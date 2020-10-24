@@ -11,11 +11,20 @@ public class FunHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
     public float requireHoldTime;
 
-    [SerializeField]
-    GameObject sphere;
-    Deplacement sphereScript;
-    Vector3 spherePreviousVel;
+    GameObject player;
+    GameObject pointer;
+    PlayerControler playerScript;
+    PointerRotation pointerScript;
     bool previousVelStocked = false;
+    bool maxPower = false;
+
+    private void Start()
+    {
+        player = GameObject.Find("Player");
+        pointer = GameObject.Find("Pointer");
+        playerScript = player.GetComponent<PlayerControler>();
+        pointerScript = pointer.GetComponent<PointerRotation>();
+    }
 
     public void OnPointerDown(PointerEventData eventData)
     {
@@ -32,34 +41,46 @@ public class FunHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
         if (pointerDown)
         {
-            pointerDownTimer += Time.deltaTime;
+            pointerScript.StartRotation();
+            playerScript.ShakeBall(true);
+            pointerDownTimer += Time.fixedDeltaTime;
             if (pointerDownTimer >= requireHoldTime)
             {
-                Reset();
+                maxPower = true;
             }
             Debug.Log("Timer : " + pointerDownTimer);
-            StopBall();
+            if (!maxPower)
+            {
+                StopBall();
+            }
         }
     }
 
     public void StopBall()
     {
-        sphereScript = sphere.GetComponent<Deplacement>();
         if (!previousVelStocked)
         {
-            sphereScript.previousVel = sphereScript.rigidbody.velocity;
+            Debug.Log(pointerScript.direction);
+            playerScript.previousVel = pointerScript.direction * playerScript.speed;
             previousVelStocked = true;
-            Debug.Log(sphereScript.previousVel);
+            Debug.Log(playerScript.previousVel);
         }
-        sphereScript.rigidbody.velocity = Vector3.zero;
-        sphereScript.previousVel *= 1.002f;
+        playerScript.rigidbody.velocity = Vector3.zero;
+        playerScript.speed *= 1.012f;
+        playerScript.shakeAmt *= 1.01f;
     }
 
     private void Reset()
     {
         previousVelStocked = false;
         pointerDown = false;
+        maxPower = false;
         pointerDownTimer = 0;
-        sphereScript.rigidbody.velocity = sphereScript.previousVel;
+        //playerScript.rigidbody.velocity = Vector3.Scale(playerScript.previousVel, pointerScript.direction);
+        playerScript.rigidbody.velocity = pointerScript.direction * playerScript.speed;
+        playerScript.speed = 100;
+        playerScript.ShakeBall(false);
+        playerScript.shakeAmt = 100;
+        pointerScript.transform.localPosition = new Vector3(0, 0, 0);
     }
 }

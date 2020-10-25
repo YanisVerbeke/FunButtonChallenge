@@ -38,24 +38,10 @@ public class PlayerControler : MonoBehaviour
         {
             savedPos = false;
         }
-
     }
 
     public void ShakeBall(bool shaking)
     {
         this.shaking = shaking;
-    }
-
-    IEnumerator ShakeNow()
-    {
-        Vector3 originalPos = transform.position;
-        if (!shaking)
-        {
-            shaking = true;
-        }
-        yield return null;
-
-        shaking = false;
-        transform.position = originalPos;
     }
 }
